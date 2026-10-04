@@ -48,6 +48,9 @@ for epoch in range(epochs):
 
     print(f"epoch {epoch + 1:>2}  loss {loss_history[-1]:.4f}  test accuracy {test_acc_history[-1]:.2%}")
 
+# keep the trained weights so the web demo (export_web.py) can use them without retraining
+nn.save("mnist_model.npz")
+
 # ----------------- RESULTS -----------------
 
 fig, (ax_loss, ax_acc) = plt.subplots(1, 2, figsize=(10, 4))

@@ -56,3 +56,12 @@ class NeuralNetwork:
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         return self.forward(X)
+
+    def save(self, path: str) -> None:
+        """Store the layer types and every parameter, e.g. '0_W' is the weight matrix of layer 0."""
+        params = {
+            f"{i}_{name}": value
+            for i, layer in enumerate(self.layers)
+            for name, value in layer.params.items()
+        }
+        np.savez(path, layers=np.array([type(layer).__name__ for layer in self.layers]), **params)
