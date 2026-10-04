@@ -36,7 +36,7 @@ nn = NeuralNetwork(
     learning_rate=0.1,
 )
 
-loss_history = nn.fit(X, y, epochs=10000, log_every=1000)
+loss_history = nn.fit(X, y, epochs=10000, log_every=1000, rng=rng)
 
 y_hat = nn.predict(X)
 predictions = (y_hat >= 0.5).astype(int)
