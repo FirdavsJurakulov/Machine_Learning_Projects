@@ -1,42 +1,59 @@
 import numpy as np
-from dataclasses import dataclass
 
-@dataclass
-class Activations:
-    def leaky_relu(self, input: np.asarray, alpha=0.01) -> np.asarray:
-        return np.where(input > 0, input, alpha * input)
-    
-    def leaky_relu_der(self, input: np.asarray, alpha=0.01) -> np.asarray:
-        return np.where(input > 0, 1, alpha)
 
-    def reLU(self, input):
-        return np.maximum(0, input)
-    def reLU_der(self, input):
-        return (input > 0).astype(float)
-    
-    def softmax(self, input: np.asarray) -> np.asarray:
-        z_max = np.max(input, axis=-1, keepdims=True) 
+class Activation:
+    """An activation is a layer with no parameters: it only transforms its input."""
 
-        exp = np.exp(input - z_max)
-        exp_sum = np.sum(exp, axis=-1, keepdims=True)
+    params = {}
+    grads = {}
 
-        return exp/exp_sum
-    
-    def sigmoid(self, input: np.asarray) -> np.asarray:
-        exp = np.exp(-input)
-        return 1/(1+exp)
-    
-    def sigmoid_der(self, input: np.asarray) -> np.asarray:
-        exp = np.exp(-input)
-        sigmoid = 1/(1+exp)
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
 
-        return sigmoid * (1-sigmoid)
+    def backward(self, grad: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
 
-    def stable_sigmoid(self, input:np.asarray) -> np.asarray:
-        return np.where(input >= 0, 1/(1+np.exp(-input)), np.exp(input)/(np.exp(input)+1))
-    
-    def stable_sigmoid_der(self, input: np.asarray) -> np.asarray:
-        st_sig = np.where(input >= 0, 1/(1+np.exp(-input)), np.exp(input)/(np.exp(input)+1))
-        return st_sig * (1 - st_sig)
-    
-    
+
+class ReLU(Activation):
+    def forward(self, x):
+        self.x = x
+        return np.maximum(0, x)
+
+    def backward(self, grad):
+        return grad * (self.x > 0)
+
+
+class LeakyReLU(Activation):
+    def __init__(self, alpha=0.01):
+        self.alpha = alpha
+
+    def forward(self, x):
+        self.x = x
+        return np.where(x > 0, x, self.alpha * x)
+
+    def backward(self, grad):
+        return grad * np.where(self.x > 0, 1.0, self.alpha)
+
+
+class Sigmoid(Activation):
+    def forward(self, x):
+        # exp(-|x|) never overflows, so this is stable for large positive and negative x
+        e = np.exp(-np.abs(x))
+        self.out = np.where(x >= 0, 1 / (1 + e), e / (1 + e))
+        return self.out
+
+    def backward(self, grad):
+        return grad * self.out * (1 - self.out)
+
+
+class Softmax(Activation):
+    def forward(self, x):
+        # subtracting the row max doesn't change the result but prevents overflow
+        exp = np.exp(x - np.max(x, axis=-1, keepdims=True))
+        self.out = exp / np.sum(exp, axis=-1, keepdims=True)
+        return self.out
+
+    def backward(self, grad):
+        # Jacobian-vector product of softmax: s * (g - sum(g * s))
+        s = self.out
+        return s * (grad - np.sum(grad * s, axis=-1, keepdims=True))
