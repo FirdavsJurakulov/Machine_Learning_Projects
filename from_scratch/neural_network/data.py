@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from neural_network import NeuralNetwork
 
 nn = NeuralNetwork(0.1)
-hidden_units = 3
+hidden_units = 5
 
 X = np.array([
     [0, 0],
@@ -24,8 +24,17 @@ num_epochs = 10000
 input_dim = X.shape[1]
 output_dim = y.shape[1]
 
-W1 = np.random.randn(input_dim, hidden_units) * np.sqrt(2 / input_dim)
-W2 = np.random.randn(hidden_units, output_dim) * np.sqrt(2 / hidden_units)
+# np.random.seed(42)
+
+W1 = np.random.randn(
+    input_dim,
+    hidden_units
+) * np.sqrt(2 / input_dim)
+
+W2 = np.random.randn(
+    hidden_units,
+    output_dim
+) * np.sqrt(2 / hidden_units)
 
 b1 = np.zeros((1, hidden_units))
 b2 = np.zeros((1, output_dim))

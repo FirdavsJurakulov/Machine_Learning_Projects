@@ -40,7 +40,7 @@ class NeuralNetwork:
 
         return np.mean(loss)
     def mean_squared_error(self, y_hat, y, n):
-        return (y_hat - y)**2/2*n
+        return (y_hat - y)**2/(2*n)
     def update(self, parameter, gradient):
         parameter -= self.learning_rate * gradient
 

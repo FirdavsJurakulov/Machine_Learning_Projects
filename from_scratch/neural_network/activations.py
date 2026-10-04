@@ -15,7 +15,7 @@ class Activations:
         return (input > 0).astype(float)
     
     def softmax(self, input: np.asarray) -> np.asarray:
-        z_max = np.maximum(input, axis=-1, keepdims=True) 
+        z_max = np.max(input, axis=-1, keepdims=True) 
 
         exp = np.exp(input - z_max)
         exp_sum = np.sum(exp, axis=-1, keepdims=True)
